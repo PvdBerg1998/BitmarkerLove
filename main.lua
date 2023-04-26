@@ -1,30 +1,58 @@
 function love.load()
-    -- Constants
-    N = 4
-    x_base = {
-        {32, 8, 1, 0},
-        {16, 2, 0, 0},
-        {4, 0, 0, 0},
-        {0, 0, 0, 0}
-    }
-    y_base = {
-        {0, 0, 0, 0},
-        {0, 0, 0, 1},
-        {0, 0, 2, 8},
-        {0, 4, 16, 32}
-    }
+    N = arg[2] -- First argument
+    if (N == nil) then
+        N = 4 -- Default
+    else
+        N = tonumber(N)
+    end
+    
+    if (N ~= 3 and N ~= 4) then
+        error("Unsupported bitmarker size")
+    end
 
     love.window.setMode(640, 640, {resizable=true})
+    font = love.graphics.setNewFont(48)
     init()
 end
 
 function init()
-    state = {
-        {false, false, false, true},
-        {false, false, true, false},
-        {false, true, false, false},
-        {true, false, false, false}
-    }
+    if (N == 4) then
+        x_base = {
+            {32, 8, 1, 0},
+            {16, 2, 0, 0},
+            {4, 0, 0, 0},
+            {0, 0, 0, 0}
+        }
+        y_base = {
+            {0, 0, 0, 0},
+            {0, 0, 0, 1},
+            {0, 0, 2, 8},
+            {0, 4, 16, 32}
+        }
+        state = {
+            {false, false, false, true},
+            {false, false, true, false},
+            {false, true, false, false},
+            {true, false, false, false}
+        }
+    else
+        x_base = {
+            {4, 1, 0},
+            {2, 0, 0},
+            {0, 0, 0}
+        }
+        y_base = {
+            {0, 0, 0},
+            {0, 0, 1},
+            {0, 2, 4}
+        }
+        state = {
+            {false, false, true},
+            {false, true, false},
+            {true, false, false}
+        }
+    end
+
     calcCoordinate()
 end
 
@@ -51,6 +79,10 @@ function love.draw()
             love.graphics.rectangle("line", w*(i-1), h*(j-1), w, h)
         end
     end
+
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.setFont(font)
+    love.graphics.printf(coordinateStr, 0, love.graphics.getHeight() / 2 - font:getHeight() / 2, love.graphics.getWidth(), "center")
 end
 
 function calcCoordinate()
@@ -66,7 +98,8 @@ function calcCoordinate()
         end
     end
 
-    love.window.setTitle(string.format("(%i, %i)", x, y))
+    coordinateStr = string.format("(%i, %i)", x, y)
+    love.window.setTitle(coordinateStr)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -86,11 +119,21 @@ function love.mousepressed(x, y, button, istouch, presses)
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    if key == "escape" or key == "q" then
+    if (key == "escape" or key == "q") then
        love.event.quit()
     end
 
-    if key == "r" then
+    if (key == "r") then
+        init()
+    end
+
+    if (key == "3" and N ~= 3) then
+        N = 3
+        init()
+    end
+
+    if (key == "4" and N ~= 4) then
+        N = 4
         init()
     end
  end
