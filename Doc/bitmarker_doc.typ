@@ -33,15 +33,15 @@ The coordinate system has $(0, 0)$ in the bottom left, increasing both $x$ and $
 
 = Field Generation
 
-#let blue = rgb("#8086FF")
-#let purple = rgb("#C080FF")
-#let red = rgb("#FF80A8")
+#let blue1 = rgb("#8086FF")
+#let purple1 = rgb("#C080FF")
+#let red1 = rgb("#FF80A8")
 
 A Python script generates a single field out of 4 types, stored as a _KLayout_ file. These fields can be of type *A*, *B*, *C*, or *D*. Field A can be seen in @overview. The field type is encoded using both optically readable text as well as a binary flag next to the bitmarkers. Inside a field, there is a grid of *32x32 macro markers*. These are spaced *50 um* apart. For each macro marker, there is a subfield of *8x8 micro markers*, spaced *5 um* apart. Every 3rd subfield is replaced by either an EBL marker or text indicating the field type. Thus, we obtain a lattice of *EBL markers*, forming a rectangular grid of *300x300 um*. These markers appear slightly off-center, as their coordinates are (optionally) aligned to multiples of 10 um for ease of use.
 
 #figure(
     image("markers_overview.png", width: 100%),
-    caption: [Field A, containing #text(blue)[EBL markers] and #text(blue)[field labels], #text(purple)[macro] and #text(red)[micro] markers.]
+    caption: [Field A, containing #text(blue1)[EBL markers] and #text(blue1)[field labels], #text(purple1)[macro] and #text(red1)[micro] markers.]
 ) <overview>
 
 = Binary Encoding
@@ -77,12 +77,7 @@ See @macro_marker, which is oriented left, thus indicating field A.
 
 = GUI
 
-To aid in decoding bitmarkers, a GUI was developed using Lua and the _Love2D_ framework. It renders a grid of squares, representing the bitmarker. These squares can be toggled from white ($1$) to black ($0$) by clicking on them.\
-Other controls are:
-- R = Reset to $(0, 0)$.
-- 3 = Set 3x3 bitmarker mode.
-- 4 = Set 4x4 bitmarker mode.
-- Q or Esc = Quit.
+To aid in decoding bitmarkers, a GUI was developed using Lua and the _Love2D_ framework. It renders a grid of squares, representing the bitmarker. These squares can be toggled from white ($1$) to black ($0$) by clicking on them. For more information and download, go to #text(blue)[#link("https://github.com/PvdBerg1998/BitmarkerLove")].
 
 #figure(
     image("decoder_gui.png", width: 60%),
