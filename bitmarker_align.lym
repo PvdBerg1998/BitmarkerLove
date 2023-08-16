@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Bitmarker Image Alignment</description>
+ <version>1.1</version>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>import pya
+from pathlib import Path
+
+def calculate_coordinates(field, x, y):
+  offsets = {
+    'A': (-2680, 1120),
+    'B': (1120, 1120),
+    'C': (-2680, -2680),
+    'D': (1120, -2680)
+  }
+
+  offset = offsets[field]
+  sep = 50
+
+  return (x * sep + offset[0] + sep / 2, y * sep + offset[1] - sep / 2)
+
+def parse_sem_metadata(path):
+  micron_bar_pix = None
+  micron_bar_um = None
+
+  lines = open(path, 'r', encoding="ISO-8859-15").readlines()
+  for line in lines:
+    if (line.startswith("$$SM_MICRON_BAR")):
+      micron_bar_pix = int(line.split(' ')[1])
+    elif (line.startswith("$$SM_MICRON_MARKER")):
+      micron_bar_um = int(line.split(' ')[1].split("um")[0])
+
+  if (micron_bar_pix is not None and micron_bar_um is not None):
+    return micron_bar_um / micron_bar_pix
+  else:
+    return 1.0
+
+class BitmarkerDialog(pya.QDialog):
+  def __init__(self, parent = None):
+    super().__init__(parent)
+    
+    settings = pya.QSettings(self)
+    self.settings = settings
+
+    self.field = settings.value("bitmarker_field", 'A')
+    self.coord = settings.value("bitmarker_coord", "0,0")
+    
+    self.setWindowTitle("Bitmarker Image Alignment")
+    self.resize(600, 100)
+    
+    layout = pya.QVBoxLayout(self)
+    self.setLayout(layout)
+    
+    form_layout = pya.QFormLayout(self)
+    layout.addLayout(form_layout)
+
+    version_box = pya.QComboBox(self)
+    version_box.addItems(['v3.1'])
+    version_box.setEnabled(False)
+    form_layout.addRow("Bitmarkers: ", version_box)
+    
+    field_box = pya.QComboBox(self)
+    field_box.addItems(['A', 'B', 'C', 'D'])
+    field_box.currentTextChanged(self.field_changed)
+    field_box.currentIndex = ['A', 'B', 'C', 'D'].index(self.field)
+    form_layout.addRow("Field: ", field_box)
+    
+    coord_edit = pya.QLineEdit(self)
+    coord_regex = pya.QRegExp("([0-9]+),([0-9]+)") # x,y
+    self.coord_validator = pya.QRegExpValidator(coord_regex, coord_edit)
+    coord_edit.setText(self.coord)
+    coord_edit.setValidator(self.coord_validator)
+    coord_edit.textEdited(self.coord_changed)
+    form_layout.addRow("Macro Marker: ", coord_edit)
+
+    img_select_button = pya.QPushButton("Browse", self)
+    img_select_button.clicked(self.browse_image)
+    self.img_path_label = pya.QLineEdit(self)
+
+    img_select_layout = pya.QHBoxLayout(self)
+    img_select_layout.addWidget(self.img_path_label)
+    img_select_layout.addWidget(img_select_button)
+    img_select_container = pya.QWidget(self)
+    img_select_container.setLayout(img_select_layout)
+    form_layout.addRow("Image: ", img_select_container)
+
+    meta_select_button = pya.QPushButton("Browse", self)
+    meta_select_button.clicked(self.browse_meta)
+    self.meta_path_label = pya.QLineEdit(self)
+
+    meta_select_layout = pya.QHBoxLayout(self)
+    meta_select_layout.addWidget(self.meta_path_label)
+    meta_select_layout.addWidget(meta_select_button)
+    meta_select_container = pya.QWidget(self)
+    meta_select_container.setLayout(meta_select_layout)
+    form_layout.addRow("Meta: ", meta_select_container)
+    
+    button = pya.QPushButton("Add Image", self)
+    button.clicked(self.add_image)
+    if (pya.Application.instance().main_window().current_view() is None):
+      button.setEnabled(False)
+    layout.addWidget(button)
+    
+  def add_image(self):
+    print("Adding image")
+    mw = pya.Application.instance().main_window()
+    lv = mw.current_view()
+
+    img_path = self.img_path_label.text
+    meta_path = self.meta_path_label.text
+
+    if (meta_path != ""):
+      print("Parsing SEM metadata...")
+      zoom = parse_sem_metadata(meta_path)
+      print(f"Estimated zoom at {zoom}")
+    else:
+      zoom = 1.0
+    
+    img_coords = calculate_coordinates(self.field, self.x(), self.y())
+    print(f"Calculated coordinates: {img_coords[0]},{img_coords[1]}")
+    img = pya.Image(str(Path(img_path).absolute())).transformed(
+      pya.DCplxTrans(zoom, 0, False, pya.DVector(img_coords[0], img_coords[1]))
+    )
+    lv.insert_image(img)
+    
+    self.done(0)
+    
+  def field_changed(self, field):
+    print(f"Field changed to {field}")
+    self.field = field
+    self.settings.setValue("bitmarker_field", self.field)
+    
+  def coord_changed(self, coord):
+    if (self.coord_validator.validate(coord, 0) == pya.QValidator_State.Acceptable):
+      print(f"Coord changed to {coord}")
+      self.coord = coord
+      self.settings.setValue("bitmarker_coord", self.coord)
+
+  def x(self):
+    return int(self.coord.split(',')[0])
+  
+  def y(self):
+    return int(self.coord.split(',')[1])
+
+  def browse_image(self):
+    print("Browsing for image...")
+    opened_path = pya.QFileDialog.getOpenFileName(
+      pya.Application.instance().main_window(),
+      "Select Image For Alignment",
+      self.settings.value("bitmarker_image_dir", pya.QDir.currentPath()),
+      "Images(*.bmp *.jpeg *.jpg *.png *.tif *.tiff);;"
+    )
+
+    if (opened_path != ""):
+      print(f"Selected image {opened_path}")
+      path = Path(opened_path)
+      if (path.exists()):
+        self.settings.setValue("bitmarker_image_dir", path.parent.absolute())
+        self.img_path_label.setText(str(path.absolute()))
+
+
+  def browse_meta(self):
+    print("Browsing for metadata...")
+    opened_path = pya.QFileDialog.getOpenFileName(
+      pya.Application.instance().main_window(),
+      "Select SEM Meta File",
+      self.settings.value("bitmarker_meta_dir", pya.QDir.currentPath()),
+      "SEM Metadata(*.txt);;"
+    )
+
+    if (opened_path != ""):
+      print(f"Selected metadata {opened_path}")
+      path = Path(opened_path)
+      if (path.exists()):
+        self.settings.setValue("bitmarker_meta_dir", path.parent.absolute())
+        self.meta_path_label.setText(str(path.absolute()))
+
+
+def trigger():
+  mw = pya.Application.instance().main_window()
+  dialog = BitmarkerDialog(mw)
+  dialog.show()
+
+a = pya.Action()
+a.on_triggered = trigger
+a.title = "Align"
+a.icon = r"/home/pim/GitHub/KLayoutTools/icon.png"
+
+menu = pya.Application.instance().main_window().menu()
+menu.insert_separator("@toolbar.end", "bitmarker_align_sep")
+menu.insert_item("@toolbar.end", "bitmarker_align", a)</text>
+</klayout-macro>
