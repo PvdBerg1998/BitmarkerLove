@@ -8,7 +8,7 @@ A PDF describing the design is available [here](https://github.com/PvdBerg1998/B
 The KLayout design files are available [here](https://github.com/PvdBerg1998/BitmarkerLove/tree/master/KLayout).
 
 ## Bitmarker Decoder GUI
-This tool is written to assist in decoding the bitmarkers on my nanowire deposition substrate. It uses the Love2D framework, hence the name.
+This tool is written to assist in decoding the bitmarkers on my nanowire deposition substrate. It uses the Love2D framework, hence the name of this repository.
 
 ### Controls
 - R = Reset to $(0, 0)$.
