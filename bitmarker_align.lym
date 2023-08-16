@@ -196,7 +196,7 @@ def trigger():
 a = pya.Action()
 a.on_triggered = trigger
 a.title = "Align"
-a.icon = r"/home/pim/GitHub/KLayoutTools/icon.png"
+a.icon = r"/home/pim/.klayout/icon.png"
 
 menu = pya.Application.instance().main_window().menu()
 menu.insert_separator("@toolbar.end", "bitmarker_align_sep")
