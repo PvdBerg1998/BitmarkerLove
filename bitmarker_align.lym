@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
  <description>Bitmarker Image Alignment</description>
- <version>1.1</version>
+ <version>1.0</version>
  <category>pymacros</category>
  <prolog/>
  <epilog/>
@@ -51,7 +51,7 @@ class BitmarkerDialog(pya.QDialog):
   def __init__(self, parent = None):
     super().__init__(parent)
     
-    settings = pya.QSettings(self)
+    settings = pya.QSettings("University of Twente", "klayout_bitmarker_align", self)
     self.settings = settings
 
     self.field = settings.value("bitmarker_field", 'A')
@@ -106,12 +106,46 @@ class BitmarkerDialog(pya.QDialog):
     meta_select_container = pya.QWidget(self)
     meta_select_container.setLayout(meta_select_layout)
     form_layout.addRow("Meta: ", meta_select_container)
+
+    autoload_button = pya.QPushButton("Find Image", self)
+    autoload_button.clicked(self.autoload)
+    layout.addWidget(autoload_button)
     
-    button = pya.QPushButton("Add Image", self)
-    button.clicked(self.add_image)
+    add_image_button = pya.QPushButton("Add Image", self)
+    add_image_button.clicked(self.add_image)
     if (pya.Application.instance().main_window().current_view() is None):
-      button.setEnabled(False)
-    layout.addWidget(button)
+      add_image_button.setEnabled(False)
+    layout.addWidget(add_image_button)
+
+  def autoload(self):
+    print(f"Finding image with coordinate {self.x()},{self.y()}")
+
+    images = list(Path(self.settings.value("bitmarker_image_dir", pya.QDir.currentPath())).glob(f"*{self.x()},{self.y()}*"))
+    meta = list(Path(self.settings.value("bitmarker_meta_dir", pya.QDir.currentPath())).glob(f"*{self.x()},{self.y()}*.txt"))
+    
+    if (len(images) == 0):
+      return
+
+    # Loop through possibilities
+    if (Path(self.img_path_label.text) in images):
+      i = images.index(Path(self.img_path_label.text))
+      if (len(images) &gt; i + 1):
+        self.img_path_label.setText(str(images[i + 1]))
+      else:
+        self.img_path_label.setText(str(images[0]))
+    else:
+      self.img_path_label.setText(str(images[0]))
+
+    # Same for metadata, but optional
+    if (len(meta) &gt; 0):
+      if (Path(self.meta_path_label.text) in meta):
+        i = meta.index(Path(self.meta_path_label.text))
+        if (len(meta) &gt; i + 1):
+          self.meta_path_label.setText(str(meta[i + 1]))
+        else:
+          self.meta_path_label.setText(str(meta[0]))
+      else:
+        self.meta_path_label.setText(str(meta[0]))
     
   def add_image(self):
     print("Adding image")
@@ -169,7 +203,6 @@ class BitmarkerDialog(pya.QDialog):
       if (path.exists()):
         self.settings.setValue("bitmarker_image_dir", path.parent.absolute())
         self.img_path_label.setText(str(path.absolute()))
-
 
   def browse_meta(self):
     print("Browsing for metadata...")
