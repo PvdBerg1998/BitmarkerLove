@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
  <description>Bitmarker Image Alignment</description>
- <version>1.0</version>
+ <version>1.2</version>
  <category>pymacros</category>
  <prolog/>
  <epilog/>
