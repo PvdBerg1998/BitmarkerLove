@@ -1,0 +1,16 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Bitmarker Design for Nanowire Alignment
+message: >-
+  This repository contains the bitmarker design
+  documentation and relevant tooling.
+type: software
+authors:
+  - given-names: P.D.
+    family-names: van den Berg
+    email: p.d.bergvanden@utwente.nl
+    affiliation: University of Twente
+    orcid: 'https://orcid.org/0009-0003-9011-959X'
+license: GPL-3.0
