@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
  <description>Bitmarker Image Alignment</description>
- <version>1.2</version>
+ <version>1.3</version>
  <category>pymacros</category>
  <prolog/>
  <epilog/>
@@ -120,8 +120,8 @@ class BitmarkerDialog(pya.QDialog):
   def autoload(self):
     print(f"Finding image with coordinate {self.x()},{self.y()}")
 
-    images = list(Path(self.settings.value("bitmarker_image_dir", pya.QDir.currentPath())).glob(f"*{self.x()},{self.y()}*"))
-    meta = list(Path(self.settings.value("bitmarker_meta_dir", pya.QDir.currentPath())).glob(f"*{self.x()},{self.y()}*.txt"))
+    images = sorted(list(Path(self.settings.value("bitmarker_image_dir", pya.QDir.currentPath())).glob(f"*{self.x()},{self.y()}*")))
+    meta = sorted(list(Path(self.settings.value("bitmarker_meta_dir", pya.QDir.currentPath())).glob(f"*{self.x()},{self.y()}*.txt")))
     
     if (len(images) == 0):
       return
