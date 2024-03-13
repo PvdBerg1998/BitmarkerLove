@@ -1,7 +1,7 @@
 #import "ieee.typ": *
 
 #show: ieee.with(
-  title: "Bitmarker Design v3.1 rev 1",
+  title: "Bitmarker Design v4",
   authors: (
     (
       name: "P. D. van den Berg, MSc.",
@@ -30,6 +30,13 @@ This design is meant as a substrate for nanowire deposition, providing special m
     A region containing both macro and micro markers.
 
 The coordinate system has $(0, 0)$ in the bottom left, increasing both $x$ and $y$ towards the top right. Numbers in a different base are indicated by a subscript, i.e. $8 = 8_(10) = 1000_2$.
+
+= Versions
+
+- *Version 4.0*\
+  Decreased micro marker density. Every other field does not contain micro markers. Backwards compatible with version 3.
+- *Version 3.0 / 3.1 / 3.1 rev 1*\
+  First public release
 
 = Field Generation
 
