@@ -55,8 +55,8 @@ class BitmarkerDialog(pya.QDialog):
     layout.addLayout(form_layout)
 
     version_box = pya.QComboBox(self)
-    version_box.addItems(['v3.1', 'v4.0'])
-    version_box.currentIndex = ['v3.1', 'v4.0'].index(self.version)
+    version_box.addItems(['v3.1', 'v5.0'])
+    version_box.currentIndex = ['v3.1', 'v5.0'].index(self.version)
     version_box.currentTextChanged(self.version_changed)
     form_layout.addRow('Bitmarkers: ', version_box)
     
@@ -67,7 +67,7 @@ class BitmarkerDialog(pya.QDialog):
     field_box.currentIndex = ['A', 'B', 'C', 'D'].index(self.field)
     if (self.version == 'v3.1'):
       field_box.setEnabled(True)
-    elif (self.version == 'v4.0'):
+    elif (self.version == 'v5.0'):
       field_box.setEnabled(False)
     form_layout.addRow('Field: ', field_box)
     
@@ -116,7 +116,7 @@ class BitmarkerDialog(pya.QDialog):
     
     if (version == 'v3.1'):
       self.field_box.setEnabled(True)
-    elif (version == 'v4.0'):
+    elif (version == 'v5.0'):
       self.field_box.setEnabled(False)
       
     self.version = version
